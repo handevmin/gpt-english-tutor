@@ -36,7 +36,9 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
   onStopSpeaking,
   textToSpeak,
   apiKey,
-  debugMode = false
+  debugMode = false,
+  currentTranscript,
+  onStartRecording,
 }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
