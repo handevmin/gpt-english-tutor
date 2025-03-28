@@ -4,12 +4,31 @@ import { useState, useEffect, useRef } from 'react';
 import { getSpeechRate } from '../data';
 
 // Web Speech API 타입 정의
+// 커스텀 타입 정의로 any 사용 방지
 declare global {
+  // SpeechRecognition 인터페이스 정의
+  interface SpeechRecognitionType extends EventTarget {
+    start: () => void;
+    stop: () => void;
+    abort: () => void;
+    addEventListener: (type: string, listener: EventListenerOrEventListenerObject) => void;
+    removeEventListener: (type: string, listener: EventListenerOrEventListenerObject) => void;
+    // 필요한 다른 메서드와 속성 추가
+  }
+
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-    mozSpeechRecognition: any;
-    msSpeechRecognition: any;
+    SpeechRecognition: {
+      new (): SpeechRecognitionType;
+    };
+    webkitSpeechRecognition: {
+      new (): SpeechRecognitionType;
+    };
+    mozSpeechRecognition: {
+      new (): SpeechRecognitionType;
+    };
+    msSpeechRecognition: {
+      new (): SpeechRecognitionType;
+    };
   }
 }
 
@@ -23,8 +42,10 @@ interface SpeechHandlerProps {
   textToSpeak: string | null;
   apiKey: string | null;
   debugMode: boolean;
-  currentTranscript: string;
-  onStartRecording: () => void;
+  // 아래 props는 제공되지만 현재 사용되지 않음
+  // 향후 기능 확장을 위해 타입에 포함
+  currentTranscript?: string;
+  onStartRecording?: () => void;
 }
 
 const SpeechHandler: React.FC<SpeechHandlerProps> = ({
@@ -37,8 +58,7 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
   textToSpeak,
   apiKey,
   debugMode = false,
-  currentTranscript,
-  onStartRecording,
+  // 미사용 props는 구조 분해에서 제외
 }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
