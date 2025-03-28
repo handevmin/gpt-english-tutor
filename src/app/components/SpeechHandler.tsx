@@ -6,10 +6,10 @@ import { getSpeechRate } from '../data';
 // Web Speech API 타입 정의
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-    mozSpeechRecognition: typeof SpeechRecognition;
-    msSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+    mozSpeechRecognition: any;
+    msSpeechRecognition: any;
   }
 }
 
