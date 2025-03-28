@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { TestQuestion, TestResult } from '../types';
+import { useState } from 'react';
+import { TestResult } from '../types';
 import { testQuestions, getRecommendedSettings } from '../prompts';
 
 interface EnglishTestProps {

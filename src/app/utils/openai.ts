@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { SystemPrompt } from '../types';
 import { getSystemPromptForDifficulty } from '../prompts';
 
 let openaiClient: OpenAI | null = null;
@@ -88,11 +87,19 @@ export async function generateChatResponse(
         });
         
         return response.choices[0]?.message?.content || '죄송합니다, 응답을 생성할 수 없었습니다.';
-      } catch (error: any) {
+      } catch (error) {
         console.error(`채팅 API 오류 발생(시도 ${attempts + 1}/${maxAttempts}):`, error);
         
+        // OpenAI 에러 타입 체크
+        interface OpenAIError {
+          status?: number;
+          message?: string;
+        }
+        
+        const openaiError = error as OpenAIError;
+        
         // API 요청 제한 오류인 경우 재시도
-        if (error?.status === 429 && attempts < maxAttempts - 1) {
+        if (openaiError?.status === 429 && attempts < maxAttempts - 1) {
           const waitTime = 3000 * (attempts + 1); // 대기 시간을 점점 늘림
           console.log(`API 요청 한도 초과: ${waitTime/1000}초 후 재시도합니다.`);
           await new Promise(resolve => setTimeout(resolve, waitTime));
@@ -101,11 +108,11 @@ export async function generateChatResponse(
         }
         
         // 다른 오류이거나 최대 시도 횟수에 도달하면 오류 발생
-        if (error?.status === 429) {
+        if (openaiError?.status === 429) {
           return '죄송합니다, API 요청 한도에 도달했습니다. 잠시 후(1-2분 정도) 다시 시도해 주세요.';
-        } else if (error?.status === 401 || error?.status === 403) {
+        } else if (openaiError?.status === 401 || openaiError?.status === 403) {
           return 'API 키 오류: API 키가 유효하지 않거나 만료되었습니다. 설정에서 API 키를 확인해주세요.';
-        } else if (error?.status >= 500) {
+        } else if (openaiError?.status >= 500) {
           return 'OpenAI 서버 오류: 서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.';
         }
         
@@ -118,4 +125,4 @@ export async function generateChatResponse(
     console.error('OpenAI API 호출 중 오류 발생:', error);
     return '죄송합니다, 오류가 발생했습니다. 다시 시도해 주세요.';
   }
-} 
+}
