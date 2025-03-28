@@ -2,15 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getSpeechRate } from '../data';
-import { getOpenAIClient } from '../utils/openai';
 
 // Web Speech API 타입 정의
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-    mozSpeechRecognition: any;
-    msSpeechRecognition: any;
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+    mozSpeechRecognition: typeof SpeechRecognition;
+    msSpeechRecognition: typeof SpeechRecognition;
   }
 }
 
@@ -38,6 +37,8 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
   textToSpeak,
   apiKey,
   debugMode = false,
+  currentTranscript,
+  onStartRecording,
 }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -47,7 +48,6 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
   
   // 음성 인식 관련 상태
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -67,14 +67,12 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
         recorder.onstart = () => {
           console.log('녹음 시작됨');
           audioChunksRef.current = [];
-          setAudioChunks([]);
           setErrorMessage(null);
         };
         
         recorder.ondataavailable = (event) => {
           if (event.data.size > 0) {
             audioChunksRef.current.push(event.data);
-            setAudioChunks(prev => [...prev, event.data]);
           }
         };
         
@@ -182,8 +180,8 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
                   result = await response.json();
                   console.log('Whisper API 응답 성공:', result);
                   break; // 성공하면 반복 종료
-                } catch (jsonError: any) {
-                  throw new Error(`응답 데이터 파싱 오류: ${jsonError.message}`);
+                } catch (jsonError) {
+                  throw new Error(`응답 데이터 파싱 오류: ${jsonError instanceof Error ? jsonError.message : String(jsonError)}`);
                 }
               } catch (error) {
                 console.error(`시도 ${attempts + 1}/${maxAttempts} 실패:`, error);
@@ -243,7 +241,7 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
         mediaRecorderRef.current.stop();
       }
     };
-  }, [apiKey]);
+  }, [apiKey, onRecordingEnd, onRecordingResult]);
   
   // 녹음 상태 변경 처리
   useEffect(() => {
@@ -571,7 +569,7 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
       }
     };
     
-  }, [textToSpeak, speechSpeed, debugMode]);
+  }, [textToSpeak, speechSpeed, debugMode, onStartSpeaking, onStopSpeaking]);
   
   // 디버그 정보 렌더링
   const renderDebugInfo = () => {
@@ -610,4 +608,4 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
   );
 };
 
-export default SpeechHandler; 
+export default SpeechHandler;

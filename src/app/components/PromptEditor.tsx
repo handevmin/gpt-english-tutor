@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
-import { SystemPrompt } from '../types';
 import { systemPrompts } from '../prompts';
 
 interface PromptEditorProps {

@@ -1,6 +1,6 @@
-import { DialogTopic, ChatSettings, SystemPrompt, TestQuestion } from './types';
-import { generateChatResponse, getOpenAIClient } from './utils/openai';
-import { systemPrompts, getSystemPromptForDifficulty } from './prompts';
+import { DialogTopic, ChatSettings, TestQuestion } from './types';
+import { getOpenAIClient } from './utils/openai';
+import { getSystemPromptForDifficulty } from './prompts';
 
 // 대화 주제
 export const topics: DialogTopic[] = [
