@@ -622,7 +622,6 @@ const SpeechHandler: React.FC<SpeechHandlerProps> = ({
   
   return (
     <>
-      {/* 음성 인식 관련 UI는 여기에 추가 */}
       {renderDebugInfo()}
     </>
   );
